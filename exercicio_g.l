@@ -1,8 +1,7 @@
 /*
   Exercicio 3g - Contador de Elementos em C
-  
   Este programa conta algumas estruturas de um arquivo .c,
-  usando a lógica original fornecida.
+  usando a logica fornecida
 */
 
 %option noyywrap
@@ -26,12 +25,12 @@ int contagem_especiais = 0;
     contagem_reservadas++; 
 }
 
-// Conta os caracteres especiais listados
+// Conta os caracteres especiais
 "!"|"@"|"&"|"|"|"%"|"$"|"#" { 
     contagem_especiais++; 
 }
 
-// Conta sequências de digitos
+// Conta sequecias de digitos
 [0-9]+ { 
     contagem_numeros++; 
 }
@@ -39,7 +38,7 @@ int contagem_especiais = 0;
 // Ignora espaços, tabs e quebras de linha
 [ \t\r\n] {}
 
-// Ignora todo o resto
+// Ignora o resto
 . {}
 
 %%
@@ -47,7 +46,6 @@ int contagem_especiais = 0;
 int main(int argc, char **argv) {
     // É preciso passar um nome de arquivo para o programa rodar
     if (argc <= 1) {
-        fprintf(stderr, "Modo de uso: %s <arquivo.c>\n", argv[0]);
         return 1;
     }
 
@@ -56,15 +54,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    yylex(); // Roda o analisador
+    yylex(); // Roda o flex
 
     // Mostra o resultado final da contagem
-    printf("\n--- Contagem Finalizada ---\n");
-    printf("Palavras reservadas (if, while, switch): %d\n", contagem_reservadas);
-    printf("Tipos de dados (int, char, etc): %d\n", contagem_tipos);
+    printf("Palavras reservadas: %d\n", contagem_reservadas);
+    printf("Tipos de dados: %d\n", contagem_tipos);
     printf("Números inteiros: %d\n", contagem_numeros);
-    printf("Caracteres especiais (!, @, #, etc): %d\n", contagem_especiais);
-    printf("---------------------------\n");
+    printf("Caracteres especiais: %d\n", contagem_especiais);
 
     return 0;
 }
