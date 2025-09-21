@@ -1,42 +1,70 @@
-// Exercicio 3g
-// Crie um programa que receba um arquivo de código fonte na linguagem C como entrada e conte a ocorrência de elementos específicos. 
-// Ao final da análise, o programa deve imprimir a quantidade total de:
-// Palavras reservadas: if, while e switch.
-// Caracteres especiais: !, @, &, |, %, $, e #.
-// Tipos de dados: int, float, double, char e void.
-// Números inteiros.
+/*
+  Exercicio 3g - Contador de Elementos em C
+  
+  Este programa conta algumas estruturas de um arquivo .c,
+  usando a lógica original fornecida.
+*/
 
 %option noyywrap
 %{
-int palavrasReservadas = 0;
-int tipos = 0;
-int numeros = 0;
-int caracEsp = 0;
+// Contadores para cada item
+int contagem_reservadas = 0;
+int contagem_tipos = 0;
+int contagem_numeros = 0;
+int contagem_especiais = 0;
 %}
 
 %%
-(char|double|int|float|long|void)[ \t*]+        { tipos++; }
-(if|while|switch)[ \t]\(                        { palavrasReservadas++; }
-"!"|"@"|"&"|"|"|"%"|"$"|"#"                 { printf("%s\n", yytext);caracEsp++; }
-[0-9]+                                          { numeros++; }
-[ \t\r\n]                                       {}
-.                                               {}
+
+// Conta tipos seguidos de espaço, tab ou '*'
+(char|double|int|float|void)[ \t*]+ { 
+    contagem_tipos++; 
+}
+
+// Conta palavras-chave seguidas de espaço e '('
+(if|while|switch)[ \t]\( { 
+    contagem_reservadas++; 
+}
+
+// Conta os caracteres especiais listados
+"!"|"@"|"&"|"|"|"%"|"$"|"#" { 
+    contagem_especiais++; 
+}
+
+// Conta sequências de digitos
+[0-9]+ { 
+    contagem_numeros++; 
+}
+
+// Ignora espaços, tabs e quebras de linha
+[ \t\r\n] {}
+
+// Ignora todo o resto
+. {}
+
 %%
+
 int main(int argc, char **argv) {
-    if (argc > 1) {
-	if (!(yyin = fopen(argv[1], "r"))) {
-	    perror(argv[1]);
-	    return 1;
-	}
-    } else {
-	fprintf(stderr, "usage: %s file.c\n", argv[0]);
-	exit(1);
+    // É preciso passar um nome de arquivo para o programa rodar
+    if (argc <= 1) {
+        fprintf(stderr, "Modo de uso: %s <arquivo.c>\n", argv[0]);
+        return 1;
     }
 
-    yylex();
-    printf("Foram encontradas %d palavras reservadas, \n%d caracteres especiais, \
-    \n%d tipos, \n%d numero(s).\n",
-	    palavrasReservadas, caracEsp, tipos, numeros);
+    if (!(yyin = fopen(argv[1], "r"))) {
+        perror(argv[1]); // Mostra erro se não conseguir abrir o arquivo
+        return 1;
+    }
+
+    yylex(); // Roda o analisador
+
+    // Mostra o resultado final da contagem
+    printf("\n--- Contagem Finalizada ---\n");
+    printf("Palavras reservadas (if, while, switch): %d\n", contagem_reservadas);
+    printf("Tipos de dados (int, char, etc): %d\n", contagem_tipos);
+    printf("Números inteiros: %d\n", contagem_numeros);
+    printf("Caracteres especiais (!, @, #, etc): %d\n", contagem_especiais);
+    printf("---------------------------\n");
 
     return 0;
 }
