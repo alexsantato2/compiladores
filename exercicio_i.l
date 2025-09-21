@@ -1,53 +1,100 @@
-// Exercicio i
-// Desenvolva um programa que receba uma expressão aritmética pela entrada-padrão (por exemplo, digitada no terminal)
-// e retorne os tokens correspondentes a cada lexema encontrado. O programa deve ser capaz de reconhecer os seguintes elementos:
-// Os operadores: + (adição), - (subtração), * (multiplicação), / (divisão).
-// O caractere de nova linha: \n.
-// Números inteiros (ex: 123) e números reais (ex: 45.67).
-// Para cada lexema identificado na entrada, o programa deve indicar qual o token correspondente.
+/*
+  Exercicio i - Tokenizador de Expressoes Aritmeticas
+  
+  Este programa lê uma expressão matemática (ex: 10 * 4.5)
+  e quebra a entrada em "tokens", identificando cada parte como
+  número, operador, etc.
+*/
 
 %option noyywrap
 %{
-    enum tokentype {
-        INTEGER = 258,
-        FLOAT = 259,
-        ADD = 260,
-        SUB = 261,
-        MUL = 262,
-        DIV = 263,
-        EOL = 264
-    };
-    int ival;
-    float fval;
+// Enum com nomes em português para os tipos de token
+enum TipoToken {
+    T_INTEIRO = 258,
+    T_REAL = 259,       // "float" é uma palavra reservada em C
+    T_SOMA = 260,
+    T_SUBTRACAO = 261,
+    T_MULTIPLICACAO = 262,
+    T_DIVISAO = 263,
+    T_FIM_LINHA = 264
+};
+
+// Variaveis para guardar o valor dos numeros encontrados
+int valorInteiro;
+float valorReal;
 %}
 
-digit                  [0-9]
+// Apelido para a expressão regular de um dígito
+digito  [0-9]
 
 %%
-"+"                     { return ADD; }
-"-"                     { return SUB; }
-"*"                     { return MUL; }
-"/"                     { return DIV; }
-{digit}+                { ival = atoi(yytext); return INTEGER; }
-{digit}+(\.{digit}+)?   { fval = atof(yytext); return FLOAT; }
-\n                      { return EOL; }
-[ \t]                   {}
-.                       { printf("lexema desconhecido: %s\n", *yytext); }
+
+"+"         { return T_SOMA; }
+"-"         { return T_SUBTRACAO; }
+"*"         { return T_MULTIPLICACAO; }
+"/"         { return T_DIVISAO; }
+
+// Regra para números inteiros. Ex: 42
+{digito}+   { 
+    valorInteiro = atoi(yytext); // Converte string para inteiro
+    return T_INTEIRO; 
+}
+
+// Regra para números reais (com ou sem parte decimal). Ex: 3.14 ou 7
+// O Flex sempre escolhe a regra que casa com o texto mais longo.
+// Por isso, "123.45" será classificado como T_REAL.
+// "123" casa com as duas regras, mas como a de T_INTEIRO vem primeiro, ela é a escolhida.
+{digito}+(\.{digito}+)? { 
+    valorReal = atof(yytext); // Converte string para float
+    return T_REAL; 
+}
+
+\n          { return T_FIM_LINHA; }
+[ \t]       {} // Ignora espaços e tabs
+
+// Se encontrar algo que não conhece
+.           { 
+    // Nota: *yytext pega apenas o primeiro caractere do lexema.
+    // Isso foi mantido para não alterar a lógica original.
+    printf("Caractere desconhecido: '%c'\n", *yytext); 
+}
 
 %%
+
 int main(int argc, char **argv) {
-    int tok;
+    int tokenAtual;
 
-    while ((tok = yylex())) {
-        printf("%d", tok);
+    printf("Digite uma expressao matematica (Ctrl+D para sair):\n> ");
 
-        if (tok == INTEGER)
-            printf(" = %d\n", ival);
-        else if (tok == FLOAT)
-            printf(" = %f\n", fval);
-        else
-            printf("\n");
+    // Loop que pede um token ao Flex até o fim da entrada
+    while ((tokenAtual = yylex())) {
+        
+        // Usando um switch para deixar a saida mais clara
+        switch (tokenAtual) {
+            case T_INTEIRO:
+                printf("Token: INTEIRO \t| Valor = %d\n", valorInteiro);
+                break;
+            case T_REAL:
+                printf("Token: REAL \t| Valor = %f\n", valorReal);
+                break;
+            case T_SOMA:
+                printf("Token: SOMA '%s'\n", yytext);
+                break;
+            case T_SUBTRACAO:
+                printf("Token: SUBTRACAO '%s'\n", yytext);
+                break;
+            case T_MULTIPLICACAO:
+                printf("Token: MULTIPLICACAO '%s'\n", yytext);
+                break;
+            case T_DIVISAO:
+                printf("Token: DIVISAO '%s'\n", yytext);
+                break;
+            case T_FIM_LINHA:
+                printf("--- Fim da Linha ---\n> ");
+                break;
+        }
     }
 
+    printf("\nFim do programa.\n");
     return 0;
 }
