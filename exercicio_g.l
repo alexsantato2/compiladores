@@ -8,17 +8,17 @@
 
 %option noyywrap
 %{
-int keywords = 0;
-int ntypes = 0;
-int numbers = 0;
-int spchars = 0;
+int palavrasReservadas = 0;
+int tipos = 0;
+int numeros = 0;
+int caracEsp = 0;
 %}
 
 %%
-(char|double|int|float|long|void)[ \t*]+        { ntypes++; }
-(if|while|switch)[ \t]\(                        { keywords++; }
-"!"|"@"|"&"|"|"|"%"|"$"|"#"                 { printf("%s\n", yytext);spchars++; }
-[0-9]+                                          { numbers++; }
+(char|double|int|float|long|void)[ \t*]+        { tipos++; }
+(if|while|switch)[ \t]\(                        { palavrasReservadas++; }
+"!"|"@"|"&"|"|"|"%"|"$"|"#"                 { printf("%s\n", yytext);caracEsp++; }
+[0-9]+                                          { numeros++; }
 [ \t\r\n]                                       {}
 .                                               {}
 %%
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     yylex();
     printf("Foram encontradas %d palavras reservadas, \n%d caracteres especiais, \
     \n%d tipos, \n%d numero(s).\n",
-	    keywords, spchars, ntypes, numbers);
+	    palavrasReservadas, caracEsp, tipos, numeros);
 
     return 0;
 }
