@@ -1,31 +1,27 @@
 /*
-  Exercicio h - Analisador Simples de SQL
-  
-  Este programa identifica as palavras-chave SELECT, FROM e WHERE
+  Exercicio h - Analisador de SQL
+  Programa identifica as palavras-chave SELECT, FROM e WHERE
   e também os identificadores (nomes de tabelas/colunas) em uma
   expressão SQL digitada no terminal.
 */
 
-// Opções do Flex:
-// noyywrap: simplifica a compilação.
-// case-insensitive: faz com que "select", "SELECT", "Select", etc., sejam tratados como iguais.
+// case-insensitive: despreza diferenca de maiusculo e minusculo
 %option noyywrap case-insensitive
 
 %{
-// Enum para dar nomes aos nossos tokens. Os números são arbitrários.
+// Enum para dar nomes aos tokens
 enum TipoToken {
-    TOKEN_SELECT = 258,
-    TOKEN_FROM = 259,
-    TOKEN_WHERE = 260,
-    TOKEN_IDENTIFICADOR = 261,
-    TOKEN_FIM_DE_LINHA = 262
+    TOKEN_SELECT = 1,
+    TOKEN_FROM = 2,
+    TOKEN_WHERE = 3,
+    TOKEN_IDENTIFICADOR = 4,
+    TOKEN_FIM_DE_LINHA = 5
 };
 
-// Apenas a declaração da nossa função que vai lidar com os identificadores.
 void processaIdentificador(char *textoId);
 %}
 
-// Definindo um apelido para nossa expressão regular de um identificador.
+// Apelido para expressao regular de identificador
 // Começa com uma letra, seguida por letras, números ou _.
 identificador   [A-Za-z][A-Za-z0-9_]+
 
@@ -38,16 +34,15 @@ identificador   [A-Za-z][A-Za-z0-9_]+
 \n              { return TOKEN_FIM_DE_LINHA; }
 
 [ \t]+          {} // Ignora espaços e tabs
-.               {} // Ignora qualquer outra coisa (virgulas, asteriscos, etc)
+.               {} // Ignora outra coisa
 
 %%
 
-// Função chamada quando um identificador é encontrado.
-// No mundo real, aqui você adicionaria o ID a uma tabela de símbolos.
+// Função chamada quando um identificador eh encontrado
 void processaIdentificador(char *textoId) {
     char copiaId[256];
     
-    // Apenas copia o texto e imprime uma mensagem.
+    // Copia e imprime mensagem (por ser ponteiro)
     strncpy(copiaId, textoId, 256);
     printf(" -> identificador encontrado: \"%s\"\n", copiaId);
 }
@@ -55,20 +50,20 @@ void processaIdentificador(char *textoId) {
 int main(int argc, char **argv) {
     int tokenAtual;
 
-    printf("Digite uma expressao SQL e pressione Enter (Ctrl+D para sair):\n");
+    printf("Digite uma expressao SQL e pressione Enter:\n");
 
-    // Loop principal: yylex() é chamado repetidamente.
-    // Ele retorna o próximo token encontrado ou 0 no fim da entrada.
+    // yylex() é chamado repetidamente
+    // Retorna o proximo token encontrado ou 0 no fim da entrada
     while ((tokenAtual = yylex())) {
         
-        // Imprime o código numérico do token que foi encontrado.
+        // Imprime o codigo numerico do token que foi encontrado
         printf("%d", tokenAtual);
 
-        // Se o token for um identificador, chama nossa função auxiliar.
+        // Se o token for um identificador, chama nossa função auxiliar
         if (tokenAtual == TOKEN_IDENTIFICADOR) {
             processaIdentificador(yytext);
         } else {
-            // Para outros tokens, apenas pula uma linha.
+            // Para outros tokens, pula uma linha
             printf("\n");
         }
     }
